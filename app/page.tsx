@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Task } from "@/types/tasks";
-import { getTasks, createTask } from "@/services/api";
+import { getTasks, createTask, deleteTask, generateSummary } from "@/services/api";
 
 export default function Home() {
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // fetch tasks
   const fetchTasks = async () => {
@@ -38,6 +39,29 @@ export default function Home() {
     fetchTasks();
   }, []);
 
+  // delete task
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteTask(id);
+      fetchTasks();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  //generate summary of the task
+  const handleGenerateSummary = async(id: string) => {
+    try {
+      setLoading(true);
+      await generateSummary(id);
+      fetchTasks();
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+    }
+  };
+
 
   return (
     <div className="flex flex-col flex-1 items-center justify-center pt-12">
@@ -64,7 +88,11 @@ export default function Home() {
           {/* Task List */}
           <div className="space-y-3 w-full">
             {tasks.length === 0 ? (
-              <p className="text-gray-600">No tasks yet</p>
+              <p className="text-gray-600 text-center mt-6">
+                No tasks yet
+                <br />
+                Note: For the first time, render can take time to respond, just because it is on free instance. Render turns server down, when server is not in use for a long time.
+              </p>
             ) : (
               tasks.map((task) => (
                 <div
@@ -73,13 +101,24 @@ export default function Home() {
                 >
                   <div className="flex justify-between">
                     <h2 className="font-semibold text-[#343434]">{task.title}</h2>
-                    <p className="text-gray-600">{new Date(task.createdAt).toLocaleString()}</p>
+                    <div className="flex justify-end gap-6">
+                      <p className="text-gray-600">{new Date(task.createdAt).toLocaleString()}</p>
+                      <button 
+                      className="text-gray-600 bg-red-700 text-white px-4 py-2 rounded-full cursor-pointer"
+                      onClick={() => handleDelete(task._id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
-                  {task?.generatedSummary ? (
+                  {loading ? (
+                    <p className="text-gray-600">Generating Summary...</p>
+                  ) : task?.generatedSummary ? (
                     <p className="text-gray-600">{task.generatedSummary}</p>
                   )
                   : (
                     <button 
+                    onClick={() => handleGenerateSummary(task._id)}
                     className="text-gray-600 bg-[#931062] text-white px-4 py-2 rounded-full cursor-pointer"
                     >
                       Generate Summary

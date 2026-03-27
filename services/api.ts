@@ -1,7 +1,7 @@
 import axios from "@/services/axios";
 import { Task } from "@/types/tasks";
 
-// GET tasks
+// Get tasks
 export const getTasks = async (): Promise<Task[]> => {
   const res = await axios.get("/all-tasks");
   return res.data.tasks;
@@ -13,4 +13,16 @@ export const createTask = async (data: {
 }): Promise<Task> => {
   const res = await axios.post("/create-task", data);
   return res.data.task;
+};
+
+// Delete Task
+export const deleteTask = async(id: string) => {
+  const res = await axios.delete(`/delete-task/${id}`);
+  return res.data;
+};
+
+// Generate Summary
+export const generateSummary = async(id: string) => {
+  const res = await axios.get(`/task-summary/${id}`);
+  return res.data;
 };
