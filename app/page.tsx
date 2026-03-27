@@ -29,7 +29,7 @@ export default function Home() {
     if (!title.trim()) return;
 
     try {
-      await createTask({
+      const newTask = await createTask({
         title
       });
       setTitle("");
