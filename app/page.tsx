@@ -9,13 +9,17 @@ export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
 
   // fetch tasks
   const fetchTasks = async () => {
     try {
+      setFetching(true);
       const data = await getTasks();
       setTasks(data);
+      setFetching(false);
     } catch (error) {
+      setFetching(false);
       console.log(error);
     }
   };
@@ -68,7 +72,7 @@ export default function Home() {
       <main className="flex flex-1 w-full max-w-3xl flex-col items-center"> 
           <h1 className="text-center text-4xl font-bold text-[#343434]">Smart Tasks</h1>
           <h4 className="text-center text-xl font-bold text-[#343434]">The Task: Smart Task Manager with AI Briefing </h4>
-
+          
           {/* Create Task Form */}
           <div className="my-6 flex gap-2">
             <input
@@ -87,7 +91,12 @@ export default function Home() {
 
           {/* Task List */}
           <div className="space-y-3 w-full">
-            {tasks.length === 0 ? (
+            {fetching ? 
+               (
+                 <div>Loading...</div>
+                 )
+              :
+              tasks.length === 0 ? (
               <p className="text-gray-600 text-center mt-6">
                 No tasks yet
                 <br />
