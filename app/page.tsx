@@ -33,7 +33,7 @@ export default function Home() {
         title
       });
       setTitle("");
-      fetchTasks();
+      setTasks(prevTasks => [newTask, ...prevTasks]);
     } catch (error) {
       console.log(error);
     }
@@ -47,18 +47,18 @@ export default function Home() {
   const handleDelete = async (id: string) => {
     try {
       await deleteTask(id);
-      fetchTasks();
+      setTasks(prevTasks => prevTasks.filter(task => task._id !== id));
     } catch (error) {
       console.log(error);
     }
   };
 
   //generate summary of the task
-  const handleGenerateSummary = async(id: string) => {
+  const handleGenerateSummary = async (id: string) => {
     try {
       setLoading(true);
-      await generateSummary(id);
-      fetchTasks();
+      const data = await generateSummary(id);
+      setTasks(prevTasks => prevTasks.map(task => task._id === id ? data.task : task));
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -69,36 +69,36 @@ export default function Home() {
 
   return (
     <div className="flex flex-col flex-1 items-center justify-center pt-12">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center"> 
-          <h1 className="text-center text-4xl font-bold text-[#343434]">Smart Tasks</h1>
-          <h4 className="text-center text-xl font-bold text-[#343434]">The Task: Smart Task Manager with AI Briefing </h4>
-          
-          {/* Create Task Form */}
-          <div className="my-6 flex gap-2">
-            <input
-              className="border p-3 flex-1 rounded-full w-[400px] text-[#343434] pl-5"
-              placeholder="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <button
-              onClick={handleCreate}
-              className="bg-[#343434] text-white px-4 py-2 rounded-full cursor-pointer"
-            >
-              Add
-            </button>
-          </div>
+      <main className="flex flex-1 w-full max-w-3xl flex-col items-center">
+        <h1 className="text-center text-4xl font-bold text-[#343434]">Smart Tasks</h1>
+        <h4 className="text-center text-xl font-bold text-[#343434]">The Task: Smart Task Manager with AI Briefing </h4>
 
-          {/* Task List */}
-          <div className="space-y-3 w-full">
-            {fetching ? 
-               (
-                 <div className="flex justify-center items-center py-12">
-                   <p className="text-[#343434] text-xl font-semibold">Loading...</p>
-                 </div>
-               )
-              :
-              tasks.length === 0 ? (
+        {/* Create Task Form */}
+        <div className="my-6 flex gap-2">
+          <input
+            className="border p-3 flex-1 rounded-full w-[400px] text-[#343434] pl-5"
+            placeholder="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <button
+            onClick={handleCreate}
+            className="bg-[#343434] text-white px-4 py-2 rounded-full cursor-pointer"
+          >
+            Add
+          </button>
+        </div>
+
+        {/* Task List */}
+        <div className="space-y-3 w-full">
+          {fetching ?
+            (
+              <div className="flex justify-center items-center py-12">
+                <p className="text-[#343434] text-xl font-semibold">Loading...</p>
+              </div>
+            )
+            :
+            tasks.length === 0 ? (
               <p className="text-gray-600 text-center mt-6">
                 No tasks yet
                 <br />
@@ -114,9 +114,9 @@ export default function Home() {
                     <h2 className="font-semibold text-[#343434]">{task.title}</h2>
                     <div className="flex justify-end gap-6">
                       <p className="text-gray-600">{new Date(task.createdAt).toLocaleString()}</p>
-                      <button 
-                      className="text-gray-600 bg-red-700 text-white px-4 py-2 rounded-full cursor-pointer"
-                      onClick={() => handleDelete(task._id)}
+                      <button
+                        className="text-gray-600 bg-red-700 text-white px-4 py-2 rounded-full cursor-pointer"
+                        onClick={() => handleDelete(task._id)}
                       >
                         Delete
                       </button>
@@ -127,18 +127,18 @@ export default function Home() {
                   ) : task?.generatedSummary ? (
                     <p className="text-gray-600">{task.generatedSummary}</p>
                   )
-                  : (
-                    <button 
-                    onClick={() => handleGenerateSummary(task._id)}
-                    className="text-gray-600 bg-[#931062] text-white px-4 py-2 rounded-full cursor-pointer"
-                    >
-                      Generate Summary
-                    </button>
-                  )}
+                    : (
+                      <button
+                        onClick={() => handleGenerateSummary(task._id)}
+                        className="text-gray-600 bg-[#931062] text-white px-4 py-2 rounded-full cursor-pointer"
+                      >
+                        Generate Summary
+                      </button>
+                    )}
                 </div>
               ))
             )}
-          </div>
+        </div>
       </main>
     </div>
   );
