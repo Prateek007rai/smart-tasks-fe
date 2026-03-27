@@ -9,7 +9,7 @@ export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(false);
+  const [fetching, setFetching] = useState(true);
 
   // fetch tasks
   const fetchTasks = async () => {
@@ -93,8 +93,10 @@ export default function Home() {
           <div className="space-y-3 w-full">
             {fetching ? 
                (
-                 <div>Loading...</div>
-                 )
+                 <div className="flex justify-center items-center py-12">
+                   <p className="text-[#343434] text-xl font-semibold">Loading...</p>
+                 </div>
+               )
               :
               tasks.length === 0 ? (
               <p className="text-gray-600 text-center mt-6">
