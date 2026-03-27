@@ -8,7 +8,7 @@ export default function Home() {
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [processingId, setProcessingId] = useState<string | null>(null);
   const [fetching, setFetching] = useState(true);
 
   // fetch tasks
@@ -56,13 +56,13 @@ export default function Home() {
   //generate summary of the task
   const handleGenerateSummary = async (id: string) => {
     try {
-      setLoading(true);
+      setProcessingId(id);
       const data = await generateSummary(id);
       setTasks(prevTasks => prevTasks.map(task => task._id === id ? data.task : task));
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
       console.log(error);
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -122,8 +122,8 @@ export default function Home() {
                       </button>
                     </div>
                   </div>
-                  {loading ? (
-                    <p className="text-gray-600">Generating Summary...</p>
+                  {processingId === task._id ? (
+                    <p className="text-gray-600 animate-pulse">Generating Summary...</p>
                   ) : task?.generatedSummary ? (
                     <p className="text-gray-600">{task.generatedSummary}</p>
                   )
